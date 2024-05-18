@@ -4,23 +4,26 @@ import co.pragra.learning.mycarrentalproject.dto.AuthenticationRequest;
 import co.pragra.learning.mycarrentalproject.dto.AuthenticationResponse;
 import co.pragra.learning.mycarrentalproject.dto.SignupRequest;
 import co.pragra.learning.mycarrentalproject.dto.UserDto;
+import co.pragra.learning.mycarrentalproject.entity.User;
 import co.pragra.learning.mycarrentalproject.repository.UserRepository;
 import co.pragra.learning.mycarrentalproject.services.auth.AuthService;
 import co.pragra.learning.mycarrentalproject.services.jwt.UserService;
 import co.pragra.learning.mycarrentalproject.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -58,5 +61,17 @@ public class AuthController {
         } catch (BadCredentialsException e){
             throw new BadCredentialsException("Incorrect Username or Password");
         }
+
+        final UserDetails userDetails = userService.userDetailService().loadUserByUsername(authenticationRequest.getEmail());
+        Optional<User> optionalUser= userRepository.findFirstByEmail(userDetails.getUsername());
+        final String jwt = jwtUtil.generateToken(userDetails);
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+        if(optionalUser.isPresent()){
+            authenticationResponse.setJwt(jwt);
+            authenticationResponse.setUserId(optionalUser.get().getId());
+            authenticationResponse.setUserRole(optionalUser.get().getUserRole());
+        }
+        return authenticationResponse;
     }
+
 }
