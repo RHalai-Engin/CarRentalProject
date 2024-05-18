@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class JWTUtil {
+public class JwtUtil {
 
     public String extractUserName(String token){
         return extractClaim(token, Claims::getSubject);
