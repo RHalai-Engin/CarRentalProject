@@ -1,6 +1,7 @@
 package co.pragra.learning.mycarrentalproject.dto;
 
 import co.pragra.learning.mycarrentalproject.enums.UserRole;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
